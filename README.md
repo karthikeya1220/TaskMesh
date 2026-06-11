@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JobFlow: Distributed Execution Dashboard
 
-## Getting Started
+JobFlow is a lightweight, distributed job execution platform built with Next.js 14, Prisma, and PostgreSQL. It demonstrates core distributed systems concepts including job queueing, worker heartbeats, failure recovery, and real-time dashboard monitoring.
 
-First, run the development server:
+## Features
+- **Job Queueing & Priority**: Submit jobs with configurable payload, priority, and max retry attempts.
+- **Worker Simulation**: Connect multiple simulated workers (via browser or CLI) that poll for jobs and execute them.
+- **Heartbeat Monitoring**: A background interval tracks worker health. Dead workers are marked offline and their active jobs are re-queued.
+- **Failure Recovery**: Jobs that randomly fail or whose workers crash are automatically returned to the queue and retried up to their max attempts.
+- **Real-Time Dashboard**: A modern UI designed with Stitch to monitor active workers, running jobs, and execution logs.
 
+## Setup Instructions
+
+### 1. Prerequisites
+- Node.js 18+
+- Docker (for PostgreSQL database)
+
+### 2. Database Setup
+Start a local PostgreSQL instance via Docker:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker run --name jobdb -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=jobplatform -p 5432:5432 -d postgres:15
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment Config
+Create a `.env` file in the root directory and add the connection string:
+```
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/jobplatform?schema=public"
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Install Dependencies & Initialize Database
+```bash
+npm install
+npx prisma migrate dev --name init
+npx prisma generate
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Running the Application
 
-## Learn More
+### 1. Start the Next.js Server
+This will start the UI on port 3000 (or 3001) and also boot up the background scheduler and heartbeat monitor via Next.js instrumentation hooks.
+```bash
+npm run dev
+```
+Navigate to `http://localhost:3000` to view the dashboard.
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Run the CLI Worker Simulator
+To see jobs getting processed, start a worker. You can do this directly from the "Workers" tab in the UI, or by running the CLI script:
+```bash
+npx tsx scripts/simulate-worker.ts --name CLIWorker-1
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tech Stack
+- **Framework**: Next.js 14 (App Router)
+- **Database**: PostgreSQL
+- **ORM**: Prisma
+- **Styling**: Tailwind CSS
+- **Design System**: Custom design tokens from Stitch
