@@ -3,7 +3,7 @@ import { TopNavBar } from '@/components/TopNavBar';
 export default function SettingsPage() {
   return (
     <div className="flex flex-col h-full bg-surface">
-      <TopNavBar title="Settings" breadcrumbs={['Home', 'Settings']} />
+      <TopNavBar />
       <div className="flex-1 p-8">
         <div className="bg-surface-container border border-outline-variant rounded-xl p-8 max-w-2xl mx-auto mt-12">
           <div className="flex items-center gap-4 mb-8 border-b border-outline-variant pb-4">

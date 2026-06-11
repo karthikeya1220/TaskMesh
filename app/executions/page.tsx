@@ -3,7 +3,7 @@ import { TopNavBar } from '@/components/TopNavBar';
 export default function ExecutionsPage() {
   return (
     <div className="flex flex-col h-full bg-surface">
-      <TopNavBar title="Executions" breadcrumbs={['Home', 'Executions']} />
+      <TopNavBar />
       <div className="flex-1 p-8">
         <div className="bg-surface-container border border-outline-variant rounded-xl p-8 text-center max-w-2xl mx-auto mt-12">
           <span className="material-symbols-outlined text-6xl text-primary mb-4">play_circle</span>
