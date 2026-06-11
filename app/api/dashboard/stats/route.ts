@@ -15,6 +15,8 @@ export async function GET() {
       activeWorkers,
       busyWorkers,
       offlineWorkers,
+      recentJobs,
+      recentWorkers
     ] = await Promise.all([
       prisma.job.count(),
       prisma.job.count({ where: { status: JobStatus.PENDING } }),
@@ -26,6 +28,14 @@ export async function GET() {
       prisma.worker.count({ where: { status: { not: WorkerStatus.OFFLINE } } }),
       prisma.worker.count({ where: { status: WorkerStatus.BUSY } }),
       prisma.worker.count({ where: { status: WorkerStatus.OFFLINE } }),
+      prisma.job.findMany({
+        take: 5,
+        orderBy: { updated_at: 'desc' },
+      }),
+      prisma.worker.findMany({
+        take: 5,
+        orderBy: { last_heartbeat: 'desc' }
+      })
     ]);
 
     return NextResponse.json({
@@ -42,7 +52,9 @@ export async function GET() {
         active: activeWorkers,
         busy: busyWorkers,
         offline: offlineWorkers,
-      }
+      },
+      recent_jobs: recentJobs,
+      recent_workers: recentWorkers
     });
   } catch (error) {
     console.error('Failed to fetch dashboard stats', error);
