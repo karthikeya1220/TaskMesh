@@ -61,7 +61,7 @@ async function start() {
 
       setTimeout(async () => {
         const failChance = Math.random();
-        if (failChance < 0.1) {
+        if (job.payload?.fail || failChance < 0.1) {
           console.log(`[${workerName}] 💥 Job randomly failed!`);
           await apiCall(`/workers/${workerId}/fail`, 'POST', { job_id: job.id, error_message: 'Random simulated failure' });
         } else {

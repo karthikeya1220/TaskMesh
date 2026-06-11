@@ -9,9 +9,15 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchJobs = async () => {
+  const fetchJobs = async (optimisticJob?: any) => {
+    if (optimisticJob) {
+      setJobs((prev) => [optimisticJob, ...prev]);
+      return; // Return early, don't fetch right now since we are optimistic
+    }
+    
     try {
       const res = await fetch('/api/jobs');
+      if (!res.ok) throw new Error('Failed to fetch jobs');
       const data = await res.json();
       setJobs(data);
     } catch (err) {

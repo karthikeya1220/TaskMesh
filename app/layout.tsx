@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import { TopNavBar } from "@/components/TopNavBar";
+import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
   title: "JobFlow Dashboard",
@@ -20,11 +21,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body className="flex min-h-screen bg-surface text-on-surface antialiased font-body-md">
-        <Sidebar />
-        <main className="flex-1 flex flex-col min-w-0">
-          <TopNavBar />
-          {children}
-        </main>
+        <ToastProvider>
+          <Sidebar />
+          <main className="flex-1 flex flex-col min-w-0">
+            <TopNavBar />
+            {children}
+          </main>
+        </ToastProvider>
       </body>
     </html>
   );

@@ -1,36 +1,63 @@
 'use client';
 
 import { useState } from 'react';
+import { useToast } from './Toast';
 
-export function JobSubmitForm({ onSuccess }: { onSuccess: () => void }) {
+export function JobSubmitForm({ onSuccess }: { onSuccess: (optimisticJob?: any) => void }) {
   const [name, setName] = useState('');
   const [payload, setPayload] = useState('{"duration": 5000}');
   const [priority, setPriority] = useState('5');
   const [maxAttempts, setMaxAttempts] = useState('3');
   const [loading, setLoading] = useState(false);
+  const { addToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    let parsedPayload;
     try {
+      parsedPayload = JSON.parse(payload);
+    } catch (err) {
+      addToast('Invalid JSON payload format.', 'error');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Optimistic update
+      const optimisticJob = {
+        id: `optimistic-${Date.now()}`,
+        name,
+        priority: parseInt(priority, 10),
+        status: 'QUEUED',
+        attempt: 0,
+        max_attempts: parseInt(maxAttempts, 10),
+        created_at: new Date().toISOString(),
+      };
+      onSuccess(optimisticJob);
+
       const res = await fetch('/api/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
-          payload: JSON.parse(payload),
+          payload: parsedPayload,
           priority: parseInt(priority, 10),
           max_attempts: parseInt(maxAttempts, 10)
         })
       });
       if (res.ok) {
+        addToast(`Job "${name}" submitted successfully!`, 'success');
         onSuccess();
         setName('');
       } else {
-        alert('Failed to submit job');
+        const errorData = await res.json();
+        addToast(`Failed to submit job: ${errorData.error || 'Unknown error'}`, 'error');
+        onSuccess(); // Revert optimistic update by fetching again
       }
     } catch (err) {
-      alert('Error formatting payload or network error');
+      addToast('Network error while submitting job.', 'error');
+      onSuccess(); // Revert
     } finally {
       setLoading(false);
     }
